@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "version": "PTDL_v2",
+    "update_url": null
+  },
+  "exported_at": "2025-09-13T00:00:00Z",
+  "name": "Discord Bot (TypeScript) \u2014 Supabase",
+  "author": "you@example.com",
+  "description": "Discord.js v14 + TypeScript bot wired to Supabase (Realtime hot-reload, logging, plugins). Installs with pnpm, builds TS, starts node dist/index.js.",
+  "features": null,
+  "docker_images": {
+    "Node.js 20": "ghcr.io/parkervcp/yolks:nodejs_20"
+  },
+  "file_denylist": [],
+  "startup": "node dist/index.js",
+  "config": {
+    "files": "{}",
+    "startup": "{\n    \"done\": \"Bot ready\"\n}",
+    "stop": "^C"
+  },
+  "scripts": {
+    "installation": {
+      "script": "#!/bin/bash\nset -euo pipefail\ncd /home/container\n\n# Enable corepack and pnpm\nif command -v pnpm >/dev/null 2>&1; then\n  PM=pnpm\nelse\n  corepack enable >/dev/null 2>&1 || true\n  corepack prepare pnpm@latest --activate || true\n  PM=pnpm\nfi\n\n# If package.json isn't present, initialize a workspace (allows panel to build after upload)\nif [ ! -f package.json ]; then\n  echo \"No package.json found. Are you sure you uploaded the project files?\"\n  exit 10\nfi\n\n# Install deps (dev deps required to compile TS)\n$PM install\n\n# Build TS -> JS\n$PM run build || { echo \"Build failed\"; exit 11; }\n\necho \"Build complete. The panel will use 'node dist/index.js' for startup.\"\n",
+      "container": "ghcr.io/parkervcp/installers:debian",
+      "entrypoint": "bash"
+    }
+  },
+  "variables": [
+    {
+      "name": "Discord Bot Token",
+      "description": "Discord application bot token (requires message content intent enabled).",
+      "env_variable": "DISCORD_BOT_TOKEN",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:256",
+      "field_type": "text"
+    },
+    {
+      "name": "Supabase URL",
+      "description": "Your Supabase project URL (https://xxx.supabase.co).",
+      "env_variable": "SUPABASE_URL",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Supabase Service Role Key",
+      "description": "Service role key (backend-only). Consider using a restricted key for production.",
+      "env_variable": "SUPABASE_SERVICE_ROLE_KEY",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Node Environment",
+      "description": "Node environment.",
+      "env_variable": "NODE_ENV",
+      "default_value": "production",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|in:production,development",
+      "field_type": "text"
+    },
+    {
+      "name": "Supabase Realtime",
+      "description": "Enable realtime hot-reload (guild_configs, bot_commands, bot_plugins).",
+      "env_variable": "SUPABASE_REALTIME",
+      "default_value": "true",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|in:true,false",
+      "field_type": "text"
+    },
+    {
+      "name": "Edge Fn: Bot Status",
+      "description": "Supabase Edge Function name for updating bot status.",
+      "env_variable": "EDGE_FN_BOT_STATUS",
+      "default_value": "discord-bot-status",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:128",
+      "field_type": "text"
+    },
+    {
+      "name": "Edge Fn: Send Message",
+      "description": "Supabase Edge Function name for sending messages.",
+      "env_variable": "EDGE_FN_SEND_MESSAGE",
+      "default_value": "discord-send-message",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:128",
+      "field_type": "text"
+    },
+    {
+      "name": "Edge Fn: Guild Management",
+      "description": "Supabase Edge Function name for guild management tasks.",
+      "env_variable": "EDGE_FN_GUILD_MANAGEMENT",
+      "default_value": "guild-management",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:128",
+      "field_type": "text"
+    }
+  ]
+}
